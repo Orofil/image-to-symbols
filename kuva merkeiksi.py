@@ -29,7 +29,7 @@ while True:
         filename = input("\nSyötä kuvan polku: ")
         image = Image.open(filename)
         break
-    except IOError as e:
+    except (IOError, OSError) as e:
         print("Kuvaa ei voida avata!\nVirhe: " + e)
 
 # Luetaan kuvan pikselit
@@ -67,17 +67,17 @@ for x in lightness:
     
 print(lightness_txt)
 
-fileindex = ""
+filename_out = filename+"_ascii.txt"
+
 if exists(filename+"_ascii.txt"):
     fileindex = 2
     while True:
-        filename_out = filename+"_ascii"+fileindex+".txt"
+        filename_out = filename+"_ascii"+str(fileindex)+".txt"
         if exists(filename_out):
             fileindex += 1
             continue
         else:
             break
-        
         
 output = open(filename_out, "w")
 output.writelines(lightness_txt)
@@ -87,6 +87,6 @@ output.close()
 if platform.system() == 'Darwin':       # macOS
     subprocess.call(('open', filename_out))
 elif platform.system() == 'Windows':    # Windows
-    os.startfile(filename_out)
+    os.system(filename_out)
 else:                                   # linux variants
     subprocess.call(('xdg-open', filename_out))
