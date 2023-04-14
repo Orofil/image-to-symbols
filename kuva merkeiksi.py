@@ -24,6 +24,7 @@ Kuvan voi siis syöttää pelkällä sen nimellä ja tiedostopäätteellä, jos 
 ### reverse [[0," "], [0.1,"."], [0.2,"-"], [0.3,"~"], [0.4,"+"], [0.5,"¤"], [0.6,"O"], [0.7,"#"], [0.8,"§"], [0.9,"@"]]
 symbols = [[0,"@"], [0.1,"§"], [0.2,"#"], [0.3,"O"], [0.4,"¤"], [0.5,"+"], [0.6,"~"], [0.7,"-"], [0.8,"."], [0.9," "]]
 
+# Avataan kuva
 while True:
     try:
         filename = input("\nSyötä kuvan polku: ")
@@ -31,6 +32,23 @@ while True:
         break
     except (IOError, OSError) as e:
         print("Kuvaa ei voida avata!\nVirhe: " + e)
+
+# Muutetaan kuvan koko
+while True:
+    new_width = input("\nLuotavan kuvan leveys (jätä tyhjäksi jos käytetään alkuperäistä leveyttä): ")
+    if new_width == "":
+        break
+    
+    try:
+        new_width = int(new_width)
+    except ValueError as e:
+        print("Virheellinen kuvakoko!\nVirhe: " + e)
+    
+    if new_width <= 0:
+        print("Virheellinen kuvakoko!")
+    
+    image = image.resize((new_width, round((image.height / image.width) * new_width)))
+    break
 
 # Luetaan kuvan pikselit
 pixels = image.convert("RGB")
