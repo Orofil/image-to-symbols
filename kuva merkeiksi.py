@@ -24,14 +24,20 @@ Kuvan voi siis syöttää pelkällä sen nimellä ja tiedostopäätteellä, jos 
 ### reverse [[0," "], [0.1,"."], [0.2,"-"], [0.3,"~"], [0.4,"+"], [0.5,"¤"], [0.6,"O"], [0.7,"#"], [0.8,"§"], [0.9,"@"]]
 symbols = [[0,"@"], [0.1,"§"], [0.2,"#"], [0.3,"O"], [0.4,"¤"], [0.5,"+"], [0.6,"~"], [0.7,"-"], [0.8,"."], [0.9," "]]
 
+# Yhden █-merkin korkeus jaettuna leveydellä
+# Käytetään jos ei halua kuvan venyvän kun merkkien mittasuhde ei ole 1:1
+char_h_to_w = 112/53
+
 # Avataan kuva
 while True:
     try:
         filename = input("\nSyötä kuvan polku: ")
+        if (filename[0] == '"' and filename[-1] == '"'):
+            filename = filename[1:-1]
         image = Image.open(filename)
         break
     except (IOError, OSError) as e:
-        print("Kuvaa ei voida avata!\nVirhe: " + e)
+        print("Kuvaa ei voida avata!\nVirhe:", e)
 
 # Muutetaan kuvan koko
 while True:
@@ -42,13 +48,21 @@ while True:
     try:
         new_width = int(new_width)
     except ValueError as e:
-        print("Virheellinen kuvakoko!\nVirhe: " + e)
+        print("Virheellinen kuvakoko!\nVirhe:", e)
     
     if new_width <= 0:
         print("Virheellinen kuvakoko!")
     
     image = image.resize((new_width, round((image.height / image.width) * new_width)))
     break
+
+# Muutetaan kuvan muotoa merkkien mittasuhteiden perusteella
+if char_h_to_w != 1:
+    if char_h_to_w > 1:
+        ratio = (image.width, round(image.height * (1 / char_h_to_w)))
+    else:
+        ratio = (round(image.width * char_h_to_w), image.height)
+    image = image.resize(ratio)
 
 # Luetaan kuvan pikselit
 pixels = image.convert("RGB")
