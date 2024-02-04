@@ -1,5 +1,5 @@
-Tämä ohjelma muuntaa jpg- tai png-kuvan ASCII-merkeiksi.
-Jotkin muutkin tiedostotyypit toimivat ehkä, saa kokeilla.
+This program converts a JPG or PNG image into symbols.
+Some other file types might also work, but it's pretty unstable right now even with these types :D (one PNG file worked but other didn't...)
 
-Tiedostopolku voi olla joko absoluuttinen tai suhteellinen tähän tiedostoon.
-Kuvan voi siis syöttää pelkällä sen nimellä ja tiedostopäätteellä, jos se on samassa kansiossa tämän koodin kanssa.
+The file path may either be absolute or relative to this file (and it can have double quotation marks around it).
+In other words, the image can be inputted using only its name and file extension if it's in the same folder as this script.
