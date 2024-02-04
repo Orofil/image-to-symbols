@@ -25,7 +25,7 @@ In other words, the image can be inputted using only its name and file extension
 symbols = [[0,"@"], [0.1,"§"], [0.2,"#"], [0.3,"O"], [0.4,"¤"], [0.5,"+"], [0.6,"~"], [0.7,"-"], [0.8,"."], [0.9," "]]
 
 # The height of the symbol "█" divided by its width
-# Käytetään jos ei halua kuvan venyvän kun merkkien mittasuhde ei ole 1:1
+# Used if you don't want the output to stretch when the aspect ratio of the symbols isn't 1:1
 char_h_to_w = 112/53
 
 # Opening the image
