@@ -1,4 +1,4 @@
-print("Avataan...")
+print("Starting up...")
 
 import os
 import sys
@@ -10,75 +10,90 @@ from alive_progress import alive_bar
 import subprocess
 import platform
 
-# Asetetaan ohjelman polku jotenkin hienosti paikkaan mistä tiedostoa suoritetaan
+# Setting the program's path to the path of the script or something
 os.chdir(os.path.dirname(sys.argv[0]))
 
-print("""\nTämä ohjelma muuntaa jpg-kuvan ASCII-merkeiksi.
-Jotkin muutkin tiedostotyypit toimivat ehkä, saa kokeilla. (joku png-kuva toimi mutta toiset taas ei...)
-Tiedostopolku voi olla joko absoluuttinen tai suhteellinen tähän tiedostoon.
-Kuvan voi siis syöttää pelkällä sen nimellä ja tiedostopäätteellä, jos se on samassa kansiossa tämän koodin kanssa.""")
+print("""\nThis script turns a jpg image into ASCII symbols.
+Some other file types might also work, you're free to try. (one png file worked but other didn't...)
+The file path may either be absolute or relative to this file.
+In other words, the image can be inputted using only its name and file extension if it's in the same folder as this script.""")
 
-# Tässä ovat symbolit kuvan piirtoa varten, niitä saa itsekin muokata
-# jos pikselin valoisuus on välillä [0, 0.1[, käytetään ensimmäistä symbolia jne.
+# Here are the symbols for drawing the image, they can be changed as one wishes
+# if a pixel's lightness is between [0, 0.1[, the first symbol is used, and so on...
 ### default [[0,"@"], [0.1,"§"], [0.2,"#"], [0.3,"O"], [0.4,"¤"], [0.5,"+"], [0.6,"~"], [0.7,"-"], [0.8,"."], [0.9," "]]
 ### reverse [[0," "], [0.1,"."], [0.2,"-"], [0.3,"~"], [0.4,"+"], [0.5,"¤"], [0.6,"O"], [0.7,"#"], [0.8,"§"], [0.9,"@"]]
 symbols = [[0,"@"], [0.1,"§"], [0.2,"#"], [0.3,"O"], [0.4,"¤"], [0.5,"+"], [0.6,"~"], [0.7,"-"], [0.8,"."], [0.9," "]]
 
-# Avataan kuva
+# The height of the symbol "█" divided by its width
+# Käytetään jos ei halua kuvan venyvän kun merkkien mittasuhde ei ole 1:1
+char_h_to_w = 112/53
+
+# Opening the image
 while True:
     try:
-        filename = input("\nSyötä kuvan polku: ")
+        filename = input("\nInput image path: ")
+        # Removing quotation marks
+        if (filename[0] == '"' and filename[-1] == '"'):
+            filename = filename[1:-1]
         image = Image.open(filename)
         break
     except (IOError, OSError) as e:
-        print("Kuvaa ei voida avata!\nVirhe: " + e)
+        print("The image can't be opened!\nError:", e)
 
-# Muutetaan kuvan koko
+# Changing the image size
 while True:
-    new_width = input("\nLuotavan kuvan leveys (jätä tyhjäksi jos käytetään alkuperäistä leveyttä): ")
+    new_width = input("\nWidth of the output (leave empty for original width): ")
     if new_width == "":
         break
     
     try:
         new_width = int(new_width)
     except ValueError as e:
-        print("Virheellinen kuvakoko!\nVirhe: " + e)
+        print("Invalid image size!\nError:", e)
     
     if new_width <= 0:
-        print("Virheellinen kuvakoko!")
+        print("Invalid image size!")
     
     image = image.resize((new_width, round((image.height / image.width) * new_width)))
     break
 
-# Luetaan kuvan pikselit
+# Changing the shape of the image
+if char_h_to_w != 1:
+    if char_h_to_w > 1:
+        ratio = (image.width, round(image.height * (1 / char_h_to_w)))
+    else:
+        ratio = (round(image.width * char_h_to_w), image.height)
+    image = image.resize(ratio)
+
+# Reading the pixels
 pixels = image.convert("RGB")
 
-# Luodaan tyhjä lista (numpy array koska se on nopeampi kuin tavallinen lista)
+# Creating an empty list for the pixels (numpy array because it's faster than a normal list)
 lightness = numpy.empty(shape=(image.height, image.width), dtype=str)
 
-# Jokaiselle pikselille toistetaan:
-# Edistymispalkki
+# Repeat for every pixel:
+# Progress bar
 with alive_bar(image.height*image.width) as bar:
     for row in range(0, image.height):
         for column in range(0, image.width):
             rgb = pixels.getpixel((column, row))
             
-            # Muunnetaan pikselin RGB-tiedot HLS-muotoon
-            # huom! HLS-arvot ovat välillä 0-1
+            # Changing the pixels RGB-values to HLS
+            # Note! HLS-values are between 0.0 and 1.0
             hls = colorsys.rgb_to_hls(rgb[0]/255, rgb[1]/255, rgb[2]/255)
             
-            # Muunnetaan pikselien arvot symboleiksi
+            # Changing the pixel values to symbols
             for x in symbols:
-                # käytetään vain HLS:n toista arvoa L eli lightness, kirkkaus
+                # Using only the second value from HLS, lightness
                 if hls[1] >= x[0]:
                     lightness[row, column] = x[1]
                 else:
                     break
             
-            # Päivitetään edistymispalkki
+            # Updating the progress bar
             bar()
 
-# Listat tekstiksi
+# Lists to text
 lightness_txt = ""
 for x in lightness:
     lightness_txt += "".join(x)+"\n"
